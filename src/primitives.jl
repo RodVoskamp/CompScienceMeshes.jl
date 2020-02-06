@@ -169,7 +169,7 @@ Ruled Surface(4)={4} In Sphere{1};
 end
 
 """
-not working yet
+creates a tetrahedral mesh with radius around the origin
 """
 function tetmeshsphere(radius,delta)
     s = """
@@ -315,4 +315,70 @@ Volume(1)={1};
 
     return m
 
+end
+
+
+
+function tetmeshcuboid(xlength, ylength, zlength,delta)
+    s = """
+    lc = $delta;
+
+    Point(1)={$xlength,$ylength,$zlength,lc};
+    Point(2)={-$xlength,$ylength,$zlength,lc};
+    Point(3)={$xlength,-$ylength,$zlength,lc};
+    Point(4)={-$xlength,-$ylength,$zlength,lc};
+    Point(5)={$xlength,$ylength,-$zlength,lc};
+    Point(6)={-$xlength,$ylength,-$zlength,lc};
+    Point(7)={$xlength,-$ylength,-$zlength,lc};
+    Point(8)={-$xlength,-$ylength,-$zlength,lc};
+
+    Line(1) = {2, 4};
+    Line(2) = {4, 8};
+    Line(3) = {8, 6};
+    Line(4) = {6, 2};
+    Line(5) = {2, 1};
+    Line(6) = {1, 5};
+    Line(7) = {5, 6};
+    Line(8) = {5, 7};
+    Line(9) = {7, 8};
+    Line(10) = {3, 4};
+    Line(11) = {3, 7};
+    Line(12) = {1, 3};
+
+    Curve Loop(1) = {6, 8, -11, -12};
+    Curve Loop(2) = {4, 1, 2, 3};
+    Curve Loop(3) = {11, 9, -2, -10};
+    Curve Loop(4) = {5, 6, 7, 4};
+    Curve Loop(5) = {3, -7, 8, 9};
+    Curve Loop(6) = {5, 12, 10, -1};
+
+    Surface(1)={1};
+    Surface(2)={2};
+    Surface(3)={3};
+    Surface(4)={4};
+    Surface(5)={5};
+    Surface(6)={6};
+
+    Surface Loop(1) = {1, 4, 6, 3, 5, 2};
+    Volume(1) = {1};
+    Physical Volume(1) = {1};
+    """
+
+    fn = tempname()
+    io = open(fn, "w")
+    try
+        print(io, s)
+    finally
+        close(io)
+    end
+
+    # feed the file to gmsh
+    fno = tempname()
+    run(`gmsh $fn -3 -format msh2 -o $fno`)
+    fdo = open(fno,"r")
+    m = read_gmsh3d_mesh(fdo)
+    close(fdo)
+    rm(fno)
+    rm(fn)
+    return m
 end

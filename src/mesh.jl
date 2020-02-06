@@ -346,7 +346,18 @@ function boundary(mesh)
     # find the edges that only have one adjacent face
     #i = find(x -> x < 2, sum(abs.(conn), dims=1))
     sums = sum(abs.(conn), dims=1)
+    sums2 = abs.(sum(conn, dims=1))
     i = (LinearIndices(sums))[findall(x->x<2, sums)]
+    j = sum(conn[:,i], dims=1)
+    k = transpose(i).*j
+
+    for j2 in k
+        if j2 < 0
+            j3 = abs(j2)
+            a,b,c = cells(edges)[j3][1],cells(edges)[j3][2],cells(edges)[j3][3]
+            cells(edges)[j3] = SArray{Tuple{3},Int64,1,3}(b,a,c)
+        end
+    end
 
     # create a mesh out of these
     bnd = Mesh(vertices(mesh), cells(edges)[i])
