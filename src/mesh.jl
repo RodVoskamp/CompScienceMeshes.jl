@@ -35,7 +35,6 @@ cellarray(m::Mesh) = [ k[i] for k in m.faces, i in 1:dimension(m)+1 ]
 
 """
     mesh(type, mdim, udim=mdim+1)
-
 Returns an empty mesh with `coordtype` equal to `type`, of dimension `mdim`
 and embedded in a universe of dimension `udim`
 """
@@ -45,7 +44,6 @@ mesh(T, mdim, udim=mdim+1) = Mesh(Pt{udim,T}[], SVector{mdim+1,Int}[])
 
 """
     vt = vertextype(mesh)
-
 Returns type of the vertices used to define the cells of the mesh.
 """
 vertextype(m::Mesh) = eltype(m.vertices)
@@ -54,7 +52,6 @@ vertextype(m::Mesh) = eltype(m.vertices)
 
 """
     celltype(mesh)
-
 Returns the type of the index tuples stored in the mesh.
 """
 celltype(m::Mesh) = eltype(m.faces)
@@ -63,7 +60,6 @@ celltype(m::Mesh) = eltype(m.faces)
 
 """
     coordtype(mesh)
-
 Returns `eltype(vertextype(mesh))`
 """
 coordtype(m::AbstractMesh{U,D1,T}) where {U,D1,T} = T
@@ -73,7 +69,6 @@ coordtype(m::AbstractMesh{U,D1,T}) where {U,D1,T} = T
 
 """
     dim = dimension(mesh)
-
 Returns the dimension of the mesh. Note that this is
 the dimension of the cells, not of the surrounding space.
 """
@@ -84,7 +79,6 @@ dimension(m::AbstractMesh{U,D1}) where {U,D1} = D1-1
 
 """
     universedimension(mesh)
-
 Returns the dimension of the surrounding space. Equals
 the number of coordinates required to describe a vertex.
 """
@@ -94,7 +88,6 @@ universedimension(m::Mesh) = length(vertextype(m))
 
 """
     vertices(mesh)
-
 Returns an indexable iterable to the vertices of the mesh
 """
 vertices(m::Mesh) = m.vertices
@@ -122,12 +115,9 @@ end
 
 """
     numvertices(mesh)
-
 Returns the number of vertices in the mesh.
-
 *Note*: this is the number of vertices in the vertex buffer and might include floatin vertices
 or vertices not appearing in any cell. In other words the following is not necessarily true:
-
 ```julia
     numvertices(mesh) == numcells(skeleton(mesh,0))
 ```
@@ -138,7 +128,6 @@ numvertices(m::Mesh) = length(m.vertices)
 
 """
     numcells(mesh)
-
 Returns the number of cells in the mesh.
 """
 numcells(m::Mesh) = length(m.faces)
@@ -147,7 +136,6 @@ numcells(m::Mesh) = length(m.faces)
 
 """
     cells(mesh)
-
 Return an iterable collection containing the cells making up the mesh.
 """
 cells(mesh) = mesh.faces
@@ -169,7 +157,6 @@ Base.iterate(m::AbstractMesh, state=1) = iterate(cells(m), state)
 
 """
     translate(mesh, v)
-
 Creates a new mesh by translating `mesh` over vector `v`
 """
 translate(Γ::Mesh, v) = Mesh([w + v for w in Γ.vertices], deepcopy(Γ.faces))
@@ -178,7 +165,6 @@ translate(Γ::Mesh, v) = Mesh([w + v for w in Γ.vertices], deepcopy(Γ.faces))
 
 """
     translate!(mesh, v)
-
 Translates `mesh` over vector `v` inplace.
 """
 function translate!(Γ::Mesh, v)
@@ -191,7 +177,6 @@ end
 
 """
     flip(cell)
-
 Change the orientation of a cell by interchanging the first to indices.
 """
 @generated function flip(cell)
@@ -209,7 +194,6 @@ end
 
 """
     flipmesh!(mesh)
-
 Change the orientation of a mesh
 """
 function flipmesh!(mesh)
@@ -225,7 +209,6 @@ export mirrormesh, mirrormesh!
 
 """
     mirror(vertex, normal, anchor)
-
 Mirror vertex across a plane defined by its normal and a containing point.
 """
 function mirror(vertex, normal, anchor)
@@ -283,7 +266,6 @@ end
 
 """
     fliporientation(mesh)
-
 Changes the mesh orientation inplace. If non-orientatble, undefined.
 """
 function fliporientation!(m::Mesh)
@@ -296,7 +278,6 @@ end
 
 """
     fliporientation(mesh)
-
 Returns a mesh of opposite orientation.
 """
 function fliporientation(m::Mesh)
@@ -315,7 +296,6 @@ end
 
 """
     -mesh -> flipped_mesh
-
 Create a mesh with opposite orientation.
 """
 Base.:-(m::Mesh) = fliporientation(m)
@@ -326,7 +306,6 @@ Base.getindex(m::Mesh, I::Vector{Int}) = Mesh(vertices(m), cells(m)[I])
 
 """
     boundary(mesh)
-
 Returns the boundary of `mesh` as a mesh of lower dimension.
 """
 function boundary(mesh)
@@ -348,21 +327,6 @@ function boundary(mesh)
 
     # find the edges that only have one adjacent face
     #i = find(x -> x < 2, sum(abs.(conn), dims=1))
-<<<<<<< HEAD
-    sums = sum(abs.(conn), dims=1)
-    sums2 = abs.(sum(conn, dims=1))
-    i = (LinearIndices(sums))[findall(x->x<2, sums)]
-    j = sum(conn[:,i], dims=1)
-    k = transpose(i).*j
-
-    for j2 in k
-        if j2 < 0
-            j3 = abs(j2)
-            a,b,c = cells(edges)[j3][1],cells(edges)[j3][2],cells(edges)[j3][3]
-            cells(edges)[j3] = SArray{Tuple{3},Int64,1,3}(b,a,c)
-        end
-    end
-=======
     rows = rowvals(conn)
     vals = nonzeros(conn)
 
@@ -381,7 +345,6 @@ function boundary(mesh)
 
     # sums = sum(abs.(conn), dims=1)
     # i = (LinearIndices(sums))[findall(x->x<2, sums)]
->>>>>>> upstream/master
 
     # create a mesh out of these
     # bnd = Mesh(vertices(mesh), cells(edges)[i])
@@ -414,13 +377,11 @@ end
 
 """
     vertextocellmap(mesh) -> vertextocells, numneighbors
-
 Computed an V×M array `vertextocells` where V is the number of vertices
 and M is the maximum number of cells adjacent to any given vertex such
 that `vertextocells[v,i]` is the index in the cells of `mesh` of the `i`th
 cell adjacent to teh `v`-th vertex. `numneighbors[v]` contains the number
 of cells adjacent to the `v`-th vertex.
-
 This method allows e.g. for the efficient computation of the connectivity
 matrix of the mesh.
 """
@@ -482,10 +443,8 @@ end
 
 """
     skeleton(mesh, dim)
-
 Returns a mesh comprising the `dim`-dimensional sub cells of `mesh`. For example to retrieve
 the edges of a given surface `mesh`,
-
 ```julia
 edges = skelton(mesh, 1)
 ```
@@ -545,7 +504,6 @@ end
 
 """
     skeleton(pred, mesh, dim)
-
 Like `skeleton(mesh, dim)`, but only cells for which `pred(cell)`
 returns true are withheld.
 """
@@ -584,13 +542,11 @@ end
 
 """
     connectivity(faces, cells, op=sign)
-
 Create a sparse matrix `D` of size `numcells(cells)` by `numcells(faces)` that
 contiains the connectivity info of the mesh. In particular `D[m,k]` is `op(r)`
 where `r` is the local index of face `k` in cell `m`. The sign of `r` is
 positive or negative depending on the relative orientation of face `k` in cell
 `m`.
-
 For `op=sign`, the matrix returned is the classic connectivity matrix, i.e.
 the graph version of the exterior derivative.
 """
@@ -627,21 +583,16 @@ end
 
 """
     pairs = cellpairs(mesh, edges, dropjunctionpair=false)
-
 Given a mesh and set of oriented edges from that mesh (as generated by `skeleton`),
     `cellpairs` will generate a 2 x K matrix, where K is the number of pairs
     and each column contains a pair of indices in the cell array of `mesh` that have
     one of the supplied edges in common.
-
 Returns an array of pairs of indices, each pair corresponding to a pair of adjacent faces.
-
 (If the mesh is oriented, the first row of `facepairs` will contain indices to the cell
     for which the corresponding edge has a positive relative orientation.
-
 If a edge lies on the boundary of the mesh, and only has one neighboring cell, the
     second row of `facepairs` will contain `-k` with `k` the local index of the corresponding
     edge in its neighboring triangle.
-
 If an edge has more than two neighboring cells (i.e. the edge is on a junction),
     all possible pairs of cells that have the junction edge in common are supplied. if
     `dropjunctionpair == false` then one of the possible pairs of cells is not recorded.
@@ -755,7 +706,6 @@ end
 
 """
     chart(mesh, cell) -> cell_chart
-
 Return a chart describing the supplied cell of `mesh`.
 """
 chart(mesh::Mesh, cell) = simplex(vertices(mesh,cell))
@@ -764,7 +714,6 @@ parent(mesh::Mesh) = nothing
 
 """
     isoriented(mesh) -> Bool
-
 Returns true is all cells are consistently oriented, false otherwise.
 """
 function isoriented(m::AbstractMesh)
