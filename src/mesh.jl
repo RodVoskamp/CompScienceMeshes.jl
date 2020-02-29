@@ -622,7 +622,8 @@ function connectivity(kcells::AbstractMesh, mcells::AbstractMesh, op = sign)
         for q in axes(vtok,2)
             i = vtok[vk,q]
             i == npos && break
-            kcell = kcells.faces[i]
+            # kcell = kcells.faces[i]
+            kcell = cells(kcells)[i]
             for s in axes(vtom,2)
                 j = vtom[vm,s]
                 j == npos && break
@@ -671,7 +672,7 @@ function cellpairs(mesh, edges; dropjunctionpair=false)
     # perform a dry run to determine the number of cellpairs
     v2e, nn = vertextocellmap(mesh)
     k = 0
-    for edge = edges.faces
+    for edge in edges
 
         v = edge[1]; n = nn[v]; nbd1 = v2e[v,1:n]
         v = edge[2]; n = nn[v]; nbd2 = v2e[v,1:n]
@@ -688,7 +689,7 @@ function cellpairs(mesh, edges; dropjunctionpair=false)
     facepairs = zeros(Int, 2, k)
 
     k = 1
-    for edge in edges.faces
+    for edge in edges
 
         # neighborhood of startvertex
         v = edge[1]
